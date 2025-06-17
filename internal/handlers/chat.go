@@ -200,6 +200,6 @@ func (h *ChatHandler) ChatHistory(w http.ResponseWriter, r *http.Request) {
 		logger.LogWithDetails(fmt.Errorf(err.Message))
 		utils.RespondWithJSON(w, http.StatusBadRequest, models.Error{Code: http.StatusBadRequest, Message: "Bad Request"})
 	}
-
+	
 	utils.RespondWithJSON(w, http.StatusOK, messages)
 }

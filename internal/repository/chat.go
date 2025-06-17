@@ -69,6 +69,7 @@ func (r *ChatRepository) GetMessages(message models.Message) ([]models.Message, 
 		}
 		msg.RecieverNickname = receiverNickname
 		msg.SenderNickname = senderNickname
+		msg.Type = "history"
 		messages = append(messages, msg)
 	}
 

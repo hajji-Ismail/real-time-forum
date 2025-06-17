@@ -455,8 +455,7 @@ const showChatWindow = (container, user, socket) => {
       chatWindow.remove();
       let chatusers = document.getElementById("chat_users");
       if (chatusers) {
-        const activeUsers = await getActiveUsers();
-        console.log(activeUsers, "activeUsers");
+      
         let containerr = chatUsersComponent(activeUsers, showChatWindow, socket);
         chatusers.replaceWith(containerr);
       }

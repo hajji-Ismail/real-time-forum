@@ -25,7 +25,7 @@ async function isAouth() {
       return null;
     }
   } catch (err) {
-    console.log(err, "rrrrrrrrrr");
+  
 
     showErrorPage(err);
   }
@@ -348,7 +348,7 @@ async function chat(chatContainer, socket) {
   socket.onmessage = async (event) => {
     const message = JSON.parse(event.data);
     const type = message.message_type;
-    console.log(message, "message chat ");
+
     const chatWindowExists = chatContainer.querySelector("#chat_window");
 
    
@@ -397,7 +397,10 @@ async function chat(chatContainer, socket) {
 function createMessageElement(data, senderId) {
   const messageElement = document.createElement("div");
   let senderName;
-  if (data.type == "history") {
+
+  if (data.message_type == "history") {
+ 
+    
     messageElement.className =
       data.sender_id === parseInt(senderId)
         ? "outgoing-message"
@@ -460,14 +463,14 @@ async function establishConnection() {
 
         if (chatusers) {
           const activeUsers = await getActiveUsers();
-          console.log(activeUsers, "activeUsers");
+
 
           let container = chatUsersComponent(
             activeUsers,
             showChatWindow,
             socket
           );
-          console.log(container, "container");
+       
           chatusers.replaceWith(container);
         }
       }
