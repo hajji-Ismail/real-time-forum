@@ -155,9 +155,6 @@ func (h *ChatHandler) HandleChat(w http.ResponseWriter, r *http.Request) {
 			logger.LogWithDetails(err)
 			break
 		}
-	
-	
-		
 
 		var msg models.Message
 		if err := json.Unmarshal(msgBytes, &msg); err != nil {
@@ -178,7 +175,11 @@ func (h *ChatHandler) HandleChat(w http.ResponseWriter, r *http.Request) {
 		msg.SenderNickname = sendNickname
 		h.chatServices.SaveMessage(msg)
 		// this him self
-		conn.WriteJSON(msg)
+		cons := h.Hub.Clients[msg.SenderID]
+		for _, con := range cons {
+			con.WriteJSON(msg)
+		}
+
 		h.Hub.Broadcast <- msg
 	}
 }
@@ -200,6 +201,6 @@ func (h *ChatHandler) ChatHistory(w http.ResponseWriter, r *http.Request) {
 		logger.LogWithDetails(fmt.Errorf(err.Message))
 		utils.RespondWithJSON(w, http.StatusBadRequest, models.Error{Code: http.StatusBadRequest, Message: "Bad Request"})
 	}
-	
+
 	utils.RespondWithJSON(w, http.StatusOK, messages)
 }
