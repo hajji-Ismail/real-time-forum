@@ -357,6 +357,7 @@ async function chat(chatContainer, socket) {
       const typingContainer = createTypingIndicator(message.sender_nickname);
       removetyping(messagesContainer);
       messagesContainer.appendChild(typingContainer);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
     } else {
       removetyping(messagesContainer);
     }

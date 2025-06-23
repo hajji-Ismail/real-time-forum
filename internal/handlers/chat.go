@@ -164,6 +164,7 @@ func (h *ChatHandler) HandleChat(w http.ResponseWriter, r *http.Request) {
 		}
 		if msg.Type == "typing" || msg.Type == "fin" {
 			h.Hub.Broadcast <- msg
+			
 			continue
 		}
 
