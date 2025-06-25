@@ -1,49 +1,178 @@
+import { main } from "./main.js";
+
 async function showpostsPosts() {
-      try {
-    const response = await fetch("/api/v1/posts");
-    if (!response.ok) {
-      let err = {
-        code: response.status,
-        message: response.statusText,
-      };
-      throw err;
+    try {
+        const response = await fetch("/api/v1/posts");
+        console.log(response);
+
+        if (!response.ok) {
+            let err = {
+                code: response.status,
+                message: response.statusText,
+            };
+            throw err;
+        }
+
+        const posts = await response.json();
+        console.log(posts);
+
+        return posts;
+    } catch (error) {
+        console.log(error);
     }
 
-    const posts = await response.json();
-    return posts;
-  } catch (error) {
-    showErrorPage(error);
-  }
-    
+}
+function createPost() {
+    const formElement = document.getElementById("createPost_form_element");
+    ;
+    if (!formElement) return;
+
+    formElement.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const title = formElement.querySelector("#title").value.trim();
+        const content = formElement.querySelector("#content").value.trim();
+        const categoryCheckboxes = formElement.querySelectorAll(
+            'input[name="categories"]:checked'
+        );
+        const categories = Array.from(categoryCheckboxes).map((cb) => cb.value);
+
+        const postData = {
+            title,
+            content,
+            categories,
+        };
+        try {
+            const response = await fetch("/api/v1/posts/create", {
+                method: "POST",
+                credentials: "include", // Very important
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(postData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+
+                if (errorData.UserErrors.HasError) {
+                    showPostForm(errorData.UserErrors, true);
+                    return;
+                }
+
+                const error = {
+                    code: errorData.Code,
+                    message: errorData.Message,
+                };
+
+                throw error;
+            }
+            main()
+        } catch (err) {
+            console.log(err);
+        }
+    });
 }
 async function renderPosts(section) {
-    const post = document.createElement('div');
-  const posts = await showpostsPosts();
-  console.log(posts);
-  
-  if (!posts) return;
+    const postsWrapper = document.createElement('div');
+    postsWrapper.className = 'posts-wrapper';
 
-  post.innerHTML = ""; // Clear existing content
+    const posts = await showpostsPosts();
 
-  posts.forEach(post => {
-    const postCard = document.createElement("div");
-    postCard.className = "post-card";
-    postCard.innerHTML = `
-      <h3>${post.title}</h3>
-      <p>${post.content}</p>
-      <small>Category: ${post.category}</small>
-    `;
-    section.appendChild(postCard);
-  });
-      const content = section.getElementsByClassName('content')[0];
+    if (!posts || posts.length === 0) {
+        postsWrapper.innerHTML = `<p>No posts available.</p>`;
+    } else {
+        posts.forEach(post => {
+            const postCard = document.createElement("div");
+            postCard.className = "post-card";
+
+            const categories = Array.isArray(post.categories)
+                ? post.categories.join(", ")
+                : post.categories || "Uncategorized";
+
+            postCard.innerHTML = `
+         <span>👤 ${post.Creator}</span> |
+          <span>🕒 ${new Date(post.CreatedAt).toLocaleString()}</span> |
+        <h3>${post.title}</h3>
+        <p>${post.content}</p>
+        <p><strong>Categories:</strong> ${categories}</p>
+        <div class="post-meta">
+       
+          <span>💬 ${post.TotalComments}</span>
+        </div>
+      `;
+
+            postsWrapper.appendChild(postCard);
+        });
+    }
+
+    const content = section.querySelector(".content") || section;
+    content.appendChild(postsWrapper);
+}
+
+function createpostrender(section = document.body, errors = {}) {
+    const create = document.createElement('div');
+
+    create.innerHTML = `
+    <h2>Create a Post</h2>
+    <form id="createPost_form_element">
+      <label for="title">Title:</label>
+      <input type="text" id="title" name="title" maxlength="255" required />
+      <span class="error-text">${errors.PostTilte || ""}</span>
+
+      <label for="content">Content:</label>
+      <textarea id="content" name="content" rows="6" required></textarea>
+      <span class="error-text">${errors.PostContent || ""}</span>
+
+      <label>Select Categories:</label>
+      <div class="category-container">
+        <div class="category-checkbox">
+          <input type="checkbox" id="cat-tech" name="categories" value="Technology" />
+          <label for="cat-tech">Technology</label>
+        </div>
+        <div class="category-checkbox">
+          <input type="checkbox" id="cat-sci" name="categories" value="Science" />
+          <label for="cat-sci">Science</label>
+        </div>
+        <div class="category-checkbox">
+          <input type="checkbox" id="cat-health" name="categories" value="Health" />
+          <label for="cat-health">Health</label>
+        </div>
+        <div class="category-checkbox">
+          <input type="checkbox" id="cat-life" name="categories" value="Lifestyle" />
+          <label for="cat-life">Lifestyle</label>
+        </div>
+        <div class="category-checkbox">
+          <input type="checkbox" id="cat-edu" name="categories" value="Education" />
+          <label for="cat-edu">Education</label>
+        </div>
+        <div class="category-checkbox">
+          <input type="checkbox" id="cat-game" name="categories" value="Gaming" />
+          <label for="cat-game">Gaming</label>
+        </div>
+        <div class="category-checkbox">
+          <input type="checkbox" id="cat-biz" name="categories" value="Business" />
+          <label for="cat-biz">Business</label>
+        </div>
+      </div>
+      <span class="error-text">${errors.Postcategories || ""}</span>
+
+      <button type="submit">Create Post</button>
+    </form>
+  `;
+    const content = section.getElementsByClassName('posts-wrapper')[0];
 
     if (content) {
-        content.appendChild(post);
+        content.prepend(create);
     } else {
         // fallback: append directly to section if .content not found
-        section.appendChild(post);
+        section.prepend(create);
     }
+    createPost()
 }
+
+
 export {
     renderPosts,
+    createpostrender,
+   
 }

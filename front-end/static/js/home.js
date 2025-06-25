@@ -1,23 +1,35 @@
-import { routeTo } from "./main.js";
-
+import { main, routeTo } from "./main.js";
+import { createpostrender } from "./posts.js";
 function renderheader(section) {
     section.innerHTML = ``
     const header = document.createElement('header');
     header.className = "main-header";
 
-    header.innerHTML = `
-    <div class="header-content">
-      <div class="logo" id="logo">💬 ForumApp</div>
-      <nav class="nav-links">
-     <button class="nav-btn" id="logout-btn">Logout</button>
-      </nav>
+header.innerHTML = `
+  <div class="header-content">
+    <div class="logo" id="logo">💬 ForumApp</div>
+    
+   
+    
+    <nav class="nav-links">
+     <div class="open-post-form" id="open-post-form">
+      <button id="create-post-btn" title="Create Post" class="nav-btn">
+        <i class="fas fa-plus"></i> Create
+      </button>
     </div>
-  `;
-
+      <button class="nav-btn" id="logout-btn">Logout</button>
+    </nav>
+  </div>
+`;
 
     section.prepend(header);
     document.getElementById('logo').addEventListener('click', () => {
-        routeTo("home"); // assuming "posts" is root/main forum page
+       main(); // assuming "posts" is root/main forum page
+    });
+    document.getElementById("open-post-form").addEventListener("click", () => {
+        createpostrender(section); 
+          document.getElementById("open-post-form").style.display = 'none'
+        // Your existing function to show the form
     });
 
 
@@ -71,9 +83,9 @@ function renderProfile(section = document.body, user) {
     }
 }
 function getInitials(firstName, lastName) {
-  const f = firstName ? firstName.charAt(0).toUpperCase() : '';
-  const l = lastName ? lastName.charAt(0).toUpperCase() : '';
-  return f + l;
+    const f = firstName ? firstName.charAt(0).toUpperCase() : '';
+    const l = lastName ? lastName.charAt(0).toUpperCase() : '';
+    return f + l;
 }
 
 export {

@@ -17,7 +17,7 @@ function routeTo(route , data) {
       break;
     case 'posts':
       console.log("posts");
-      
+    
       renderPosts(section)
    
       break;
@@ -47,8 +47,9 @@ async function main(){
         routeTo('login')
     } else {
       routeTo('home')
-      routeTo('profile' , data)
       routeTo('posts')
+      routeTo('profile' , data)
+     
     }
 }
 export { routeTo , main}

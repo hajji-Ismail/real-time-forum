@@ -43,3 +43,10 @@
   background-color: var(--accent-color);
   color: white;
 }
+#create-post-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--accent-color);
+}

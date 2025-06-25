@@ -2,6 +2,7 @@
 @import url("./register.css");
 @import url("./header.css");
 @import url("./profile.css");
+@import url("./posts.css");
 :root {
   --bg-color: #12111a;
   --card-bg: #1c1b23;
@@ -39,4 +40,32 @@ body {
   min-height: 100vh;
   background-color: var(--bg-color);
   color: var(--text-primary);
+}
+.content {
+  display: flex;
+  flex-direction: row; /* Left-to-right */
+  gap: 2rem;
+  padding: 2rem 4rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.posts-wrapper {
+  flex: 3; /* 75% */
+}
+
+.profile-container {
+  flex: 1; /* 25% width */
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px var(--shadow-color);
+}
+@media (max-width: 992px) {
+  .content {
+    flex-direction: column;
+  }
+
+  .profile-container {
+    width: 100%;
+  }
 }
