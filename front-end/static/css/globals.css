@@ -1,5 +1,7 @@
 @import url("./login.css");
 @import url("./register.css");
+@import url("./header.css");
+@import url("./profile.css");
 :root {
   --bg-color: #12111a;
   --card-bg: #1c1b23;

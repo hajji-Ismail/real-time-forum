@@ -1,4 +1,4 @@
-import { routeTo } from "./main.js";
+import { routeTo , main } from "./main.js";
 
 async function isAouth() {
   try {
@@ -92,7 +92,7 @@ function renderLoginPage(section = document.body, errors = {}) {
 
       localStorage.setItem("is_logged", "true");
       console.log("is_logged")
-      routeTo("posts");
+      main()
     } catch (err) {
       loginError.textContent = err.message || "Login failed. Please try again.";
     } finally {

@@ -1,6 +1,8 @@
 import { isAouth, renderLoginPage, renderRegisterpage } from "./auth.js";
+import { renderheader, renderProfile } from "./home.js";
+import { renderPosts } from "./posts.js";
 
-function routeTo(route) {
+function routeTo(route , data) {
    let section =  document.getElementById('app')
   switch (route) {
     case 'login':
@@ -14,12 +16,25 @@ function routeTo(route) {
      
       break;
     case 'posts':
+      console.log("posts");
+      
+      renderPosts(section)
    
       break;
     case 'messages':
       
       break;
+    case 'home' :
+       renderheader(section)
+       break
+    case 'profile':
+      renderProfile(section,data)
+    
+
     default:
+     
+
+
      
   }
 }
@@ -31,9 +46,11 @@ async function main(){
         
         routeTo('login')
     } else {
-        console.log('hi')
+      routeTo('home')
+      routeTo('profile' , data)
+      routeTo('posts')
     }
 }
-export { routeTo}
+export { routeTo , main}
 main()
 
