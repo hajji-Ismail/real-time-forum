@@ -1,11 +1,12 @@
 package handlers
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"text/template"
-	"web-forum/pkg/logger"
 )
 
 // import (
@@ -43,33 +44,34 @@ import (
 //		}
 //		utils.RespondWithJSON(w, http.StatusOK, Posts)
 //	}
-func parsefile(url string) (*template.Template, error) {
+func Parsefile(url string) (*template.Template, error) {
 	templ, err := template.ParseFiles(url)
 
 	return templ, err
-
 }
+
 func Servstatique(w http.ResponseWriter, r *http.Request) {
-	type eror struct {
-		ErrorMessage string
-		StatusCode   int
-	}
-	templ, err := parsefile("front-end/error.html")
+	fmt.Println("URL.Path:", r.URL.Path)
+
+	staticPrefix := "/front-end/static/"
+	relPath := strings.TrimPrefix(r.URL.Path, staticPrefix)
+	fmt.Println("Relative Path:", relPath)
+
+	baseDir := "front-end/static"
+	fullPath := filepath.Join(baseDir, filepath.Clean(relPath))
+	fmt.Println("Full Path:", fullPath)
+
+	fileInfo, err := os.Stat(fullPath)
 	if err != nil {
-		log.Fatal("internale server error")
+		fmt.Println("Error:", err)
+		http.Error(w, "File not found", http.StatusNotFound)
+		return
 	}
-	if r.Method != http.MethodGet {
-		templ.Execute(w, eror{ErrorMessage: "Method Not Allowed", StatusCode: http.StatusMethodNotAllowed})
+	if fileInfo.IsDir() {
+		fmt.Println("Requested path is a directory")
+		http.Error(w, "File not found", http.StatusNotFound)
 		return
 	}
 
-	path := r.URL.Path[1:]
-	fileinfo, err := os.Stat(path)
-	if err != nil || fileinfo.IsDir() {
-		logger.LogWithDetails(err)
-
-		templ.Execute(w, eror{ErrorMessage: "Page Not Found", StatusCode: http.StatusNotFound})
-		return
-	}
-	http.ServeFile(w, r, path)
+	http.ServeFile(w, r, fullPath)
 }

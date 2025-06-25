@@ -41,6 +41,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	err1 := h.userService.CreateUser(user)
 	if err1.Code != http.StatusCreated {
+		fmt.Println(err1)
 		logger.LogWithDetails(fmt.Errorf(err.Message))
 		utils.RespondWithJSON(w, err.Code, err1)
 		return

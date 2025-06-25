@@ -1,0 +1,107 @@
+.modal-content {
+  background-color: var(--card-bg);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 30px var(--shadow-color);
+  max-width: 400px;
+  width: 100%;
+  margin: 5% auto;
+  color: var(--text-primary);
+}
+
+.modal-content h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.8rem;
+  color: var(--accent-color);
+}
+
+.modal-content i.fas {
+  margin-right: 8px;
+  color: var(--icon-color);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+label {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+input[type="text"],
+input[type="password"] {
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  color: var(--input-text);
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+span[id^="err-"] {
+  color: var(--danger-color);
+  font-size: 0.85rem;
+  min-height: 1em;
+}
+
+button#sign-in {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button#sign-in:hover {
+  background-color: var(--accent-hover);
+}
+
+p#login-error {
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: -0.5rem;
+}
+
+.register_action {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.register_action p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.register_action .primary-btn {
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.3s ease;
+}
+
+.register_action .primary-btn:hover {
+  background-color: var(--accent-color);
+  color: white;
+}
