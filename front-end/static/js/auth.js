@@ -39,9 +39,9 @@ function renderLoginPage(section = document.body, errors = {}) {
         <p id="login-error" style="color:red;"></p>
       </form>
 
-      <div class="form-footer text-center"> 
+      <div class="register_action"> 
         <p>Don't have an account?</p>
-        <button class="primary-btn" id="register_btn">
+        <button class="secondary-btn" id="register_btn">
           <i class="fas fa-user-plus"></i> register
         </button>
       </div>
