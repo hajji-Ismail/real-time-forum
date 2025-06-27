@@ -1,61 +1,203 @@
-
-
+.posts-wrapper {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
 .post-card {
   background-color: var(--card-bg);
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 20px var(--shadow-color);
   color: var(--text-primary);
-  margin-bottom: 1.5rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 2rem; /* Adds spacing below each post */
 }
-
 .post-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 24px var(--shadow-color);
 }
 
-/* Creator & Date Info */
-.post-card > span {
-  font-size: 0.9rem;
+/* Header (User Info + Avatar) */
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-color);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.95rem;
+}
+
+.username {
+  margin: 0;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.post-date {
+  font-size: 0.85rem;
   color: var(--text-muted);
-  margin-right: 0.5rem;
 }
 
-.post-card > span + span {
-  margin-left: 0.5rem;
+.hidden {
+  display: none;
 }
 
-/* Title */
-.post-card h3 {
-  margin-top: 0.5rem;
+/* Post Title & Content */
+.post-title {
+  margin-top: 0;
   margin-bottom: 1rem;
   font-size: 1.4rem;
   color: var(--accent-color);
 }
 
-/* Content */
-.post-card p {
+.post-content {
   margin-bottom: 1rem;
   line-height: 1.6;
   color: var(--text-secondary);
 }
 
 /* Categories */
-.post-card strong {
+.post-categories {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
+  font-style: italic;
 }
 
-/* Meta (comments, likes, etc.) */
-.post-meta {
+/* Comment Section */
+.comment-section {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.comment-input {
+  flex: 1;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  color: var(--input-text);
   font-size: 0.95rem;
+}
+
+.comment-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.comment-button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.comment-button:hover {
+  background-color: var(--accent-hover);
+}
+
+/* Footer (Comment Count etc.) */
+.post-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
 }
-.post-card:not(:last-child) {
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border-color);
+/* Comment Input Section */
+.comment-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.comment-input {
+  flex: 1;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  color: var(--input-text);
+  font-size: 0.95rem;
+  transition: border-color 0.3s ease;
+}
+
+.comment-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.comment-button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.comment-button:hover {
+  background-color: var(--accent-hover);
+}
+
+/* Comment Count Footer */
+.post-footer {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  display: inline-block;
+  transition: color 0.3s ease;
+}
+
+.post-footer i {
+  margin-right: 0.25rem;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+
+.post-footer:hover,
+.post-footer:hover i {
+  color: var(--accent-color);
+}
+
+/* Comment List */
+.comment-list {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.comment-list.hidden {
+  display: none;
+}
+
+.comment-list p {
+  margin: 0.5rem 0;
 }

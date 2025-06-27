@@ -1,8 +1,11 @@
 import { isAouth, renderLoginPage, renderRegisterpage } from "./auth.js";
+
 import { renderheader, renderProfile } from "./home.js";
+import { establishConnection } from "./messages.js";
 import { renderPosts } from "./posts.js";
 
-function routeTo(route , data) {
+
+async function routeTo(route , data) {
    let section =  document.getElementById('app')
   switch (route) {
     case 'login':
@@ -22,6 +25,10 @@ function routeTo(route , data) {
    
       break;
     case 'messages':
+      console.log('mesg');
+      
+      await establishConnection()
+      
       
       break;
     case 'home' :
@@ -29,6 +36,10 @@ function routeTo(route , data) {
        break
     case 'profile':
       renderProfile(section,data)
+      break
+    
+  
+
     
 
     default:
@@ -46,9 +57,11 @@ async function main(){
         
         routeTo('login')
     } else {
+      routeTo('messages')
       routeTo('home')
-      routeTo('posts')
       routeTo('profile' , data)
+      routeTo('posts')
+      
      
     }
 }

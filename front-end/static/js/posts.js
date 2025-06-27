@@ -1,4 +1,5 @@
-import { main } from "./main.js";
+import { attachCommentListeners } from "./comment.js";
+import { main, routeTo } from "./main.js";
 
 async function showpostsPosts() {
     try {
@@ -73,40 +74,72 @@ function createPost() {
     });
 }
 async function renderPosts(section) {
-    const postsWrapper = document.createElement('div');
-    postsWrapper.className = 'posts-wrapper';
+  const postsWrapper = document.createElement('div');
+  postsWrapper.className = 'posts-wrapper';
 
-    const posts = await showpostsPosts();
+  const posts = await showpostsPosts();
 
-    if (!posts || posts.length === 0) {
-        postsWrapper.innerHTML = `<p>No posts available.</p>`;
-    } else {
-        posts.forEach(post => {
-            const postCard = document.createElement("div");
-            postCard.className = "post-card";
+  if (!posts || posts.length === 0) {
+    postsWrapper.innerHTML = `<p>No posts available.</p>`;
+  } else {
+    posts.forEach(post => {
+      const postCard = document.createElement("div");
+      postCard.className = "post-card";
 
-            const categories = Array.isArray(post.categories)
-                ? post.categories.join(", ")
-                : post.categories || "Uncategorized";
+      const date = new Date(post.CreatedAt).toLocaleString();
 
-            postCard.innerHTML = `
-         <span>👤 ${post.Creator}</span> |
-          <span>🕒 ${new Date(post.CreatedAt).toLocaleString()}</span> |
-        <h3>${post.title}</h3>
-        <p>${post.content}</p>
-        <p><strong>Categories:</strong> ${categories}</p>
-        <div class="post-meta">
-       
-          <span>💬 ${post.TotalComments}</span>
+      const categoryTags = Array.isArray(post.categories)
+        ? post.categories.map(cat => `<span class="category-tag">${cat}</span>`).join(" ")
+        : `<span class="category-tag">Uncategorized</span>`;
+
+      postCard.innerHTML = `
+        <div class="post-header">
+          <img
+            src="/front-end/static/assets/avatar.png"
+            alt="User Profile"
+            class="profile-pic"
+          />
+          <div class="user-info">
+            <h4 class="username">${post.Creator}</h4>
+            <span class="post-date">Posted on ${date}</span>
+            <span class="hidden" data-post-id="${post.ID}"></span>
+          </div>
+        </div>
+
+        <div class="post-body">
+          <h3 class="post-title">${post.title}</h3>
+          <p class="post-content">${post.content}</p>
+        </div>
+
+        <div class="post-categories">
+          ${categoryTags}
+        </div>
+
+        <div class="comment-section">
+          <input type="text" placeholder="Write a comment..." class="comment-input" />
+          <button class="comment-button" data-post-id="${post.ID}">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+
+      <div class="comments-list hidden" data-comments-for="${post.ID}"></div>
+
+
+        <div class="post-footer">
+       <span><i class="fa-solid fa-comment"></i> <span class="comment-count">${post.TotalComments}</span></span>
+
         </div>
       `;
 
-            postsWrapper.appendChild(postCard);
-        });
-    }
+      postsWrapper.appendChild(postCard);
+    });
+  }
 
-    const content = section.querySelector(".content") || section;
-    content.appendChild(postsWrapper);
+  const content = section.querySelector(".content") || section;
+
+  content.appendChild(postsWrapper);
+
+attachCommentListeners()
 }
 
 function createpostrender(section = document.body, errors = {}) {
