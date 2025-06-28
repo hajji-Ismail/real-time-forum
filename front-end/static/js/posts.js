@@ -4,8 +4,7 @@ import { main, } from "./main.js";
 async function showPosts() {
     try {
         const response = await fetch("/api/v1/posts");
-        console.log(response);
-
+        
         if (!response.ok) {
             let err = {
                 code: response.status,
@@ -15,7 +14,7 @@ async function showPosts() {
         }
 
         const posts = await response.json();
-        console.log(posts);
+   
 
         return posts;
     } catch (error) {

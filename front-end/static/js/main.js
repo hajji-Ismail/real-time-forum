@@ -58,11 +58,12 @@ async function main() {
     routeTo('login')
   } else {
     routeTo('messages')
+     routeTo('users')
+
     routeTo('home')
     routeTo('posts')
     routeTo('profile', data)
-    routeTo('users')
-
+   
 
 
   }

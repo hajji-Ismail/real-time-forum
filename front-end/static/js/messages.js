@@ -16,6 +16,20 @@ async function establishConnection() {
       socket.send(JSON.stringify({ sender_id: senderId }));
       resolve(socket);
     };
+    socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+
+      if (message.message_type === "Online") {
+        updateUserStatus(message.sender_id, true);
+      }
+
+      if (message.message_type === "Offline") {
+        updateUserStatus(message.sender_id, false);
+      }
+
+      // handle other message types like "message" here...
+    };
+
 
     socket.onerror = (err) => {
       console.error("WebSocket error:", err);
@@ -96,10 +110,12 @@ async function showChatWindow(receiverId, nickname) {
   // Handle incoming messages
   socket.onmessage = (event) => {
     const msg = JSON.parse(event.data);
+    console.log(msg, 'message');
+
 
     if (msg.message_type === "message") {
       console.log('hi');
-      
+
       const isChattingWithSender =
         (msg.sender_id === receiverId && msg.receiver_id === senderId) ||
         (msg.sender_id === senderId && msg.receiver_id === receiverId);
@@ -110,13 +126,31 @@ async function showChatWindow(receiverId, nickname) {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
       } else {
         console.log('sdfsdfsdfvdddddddddddddddddddddddddddddddddddddddddd');
-        
+
         showMessage(`New message from ${msg.sender_nickname}`);
       }
     }
+    if (msg.message_type === "Online" || msg.message_type === "Offline") {
+      console.log('hi');
+
+      updateUserStatus(msg.sender_id, msg.message_type);
+    }
+
   };
 }
 
+
+function updateUserStatus(userId, isOnline) {
+  // Find the user's status dot using data-user-id
+  const userItem = document.querySelector(`li[data-user-id="${userId}"]`);
+  if (!userItem) return;
+
+  const statusDot = userItem.querySelector(".status-dot");
+  if (!statusDot) return;
+
+  statusDot.classList.remove("online", "offline");
+  statusDot.classList.add(isOnline ? "online" : "offline");
+}
 
 
 function showMessage(message) {
@@ -160,18 +194,18 @@ async function loadMessages(senderId, receiverId, offset, limit, container, prep
     if (!Array.isArray(messages) || messages.length === 0) return false;
 
     // 🔁 Sort messages by timestamp (asc)
-   
-const holder = document.createDocumentFragment();
+
+    const holder = document.createDocumentFragment();
     messages.forEach(msg => {
       const msgEl = createStyledMessage(msg, senderId);
       holder.append(msgEl)
-      
+
     });
     if (prepend) {
-        container.prepend(holder);
-      } else {
-        container.appendChild(holder);
-      }
+      container.prepend(holder);
+    } else {
+      container.appendChild(holder);
+    }
 
     return true;
   } catch (err) {
