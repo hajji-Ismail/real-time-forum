@@ -1,11 +1,10 @@
 import { routeTo } from "./main.js";
 
-   
+
 let socket = null;
 
- async function establishConnection() {
+async function establishConnection() {
   if (socket && socket.readyState <= 1) {
-    // ✅ Already connecting or open
     return socket;
   }
 
@@ -25,31 +24,163 @@ let socket = null;
 
     socket.onclose = () => {
       console.warn("WebSocket closed.");
-      // Optional: clear socket to force new instance on next call
       socket = null;
     };
   });
 }
 
-function getsocket(){
+function getsocket() {
   return socket
 }
-
-
-
 
 async function showChatWindow(receiverId, nickname) {
   const chatContainer = document.querySelector(".main-container");
   if (!chatContainer) return;
 
   const senderId = parseInt(sessionStorage.getItem("user_id"));
-  const offset = 0;
+  let offset = 0;
   const limit = 10;
+  let loading = false;
 
   // Clear previous chat
   chatContainer.innerHTML = "";
+  chatContainer.appendChild(createChatWindow(receiverId, nickname));
 
-  // Create chat window
+  const messagesContainer = document.querySelector(".chat-messages");
+  const input = document.getElementById("message");
+
+  // Close handler
+  document.getElementById("close_chat").addEventListener("click", () => {
+    chatContainer.innerHTML = "";
+    routeTo("posts");
+  });
+
+  // Load initial messages
+  await loadMessages(senderId, receiverId, offset, limit, messagesContainer);
+  offset += limit;
+
+  // Debounced scroll for history
+  messagesContainer.addEventListener("scroll", debounce(async () => {
+    if (messagesContainer.scrollTop === 0 && !loading) {
+      loading = true;
+      const prevHeight = messagesContainer.scrollHeight;
+      const loaded = await loadMessages(senderId, receiverId, offset, limit, messagesContainer, true);
+      if (loaded) offset += limit;
+      messagesContainer.scrollTop = messagesContainer.scrollHeight - prevHeight;
+      loading = false;
+    }
+  }, 1000));
+
+  // WebSocket setup
+  const socket = getsocket() || await establishConnection();
+
+  // Send message
+  document.getElementById("sent-message").addEventListener("click", () => {
+    const message = input.value.trim();
+    if (!message) return;
+
+    const msgData = {
+      sender_id: senderId,
+      receiver_id: receiverId,
+      message_content: message,
+      timestamp: new Date().toISOString(),
+      message_type: "message",
+    };
+
+    socket.send(JSON.stringify(msgData));
+    input.value = "";
+    offset++;
+    routeTo('users')
+  });
+
+  // Handle incoming messages
+  socket.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+
+    if (msg.message_type === "message") {
+      console.log('hi');
+      
+      const isChattingWithSender =
+        (msg.sender_id === receiverId && msg.receiver_id === senderId) ||
+        (msg.sender_id === senderId && msg.receiver_id === receiverId);
+
+      if (isChattingWithSender) {
+        const messageElement = createStyledMessage(msg, senderId);
+        messagesContainer.appendChild(messageElement);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      } else {
+        console.log('sdfsdfsdfvdddddddddddddddddddddddddddddddddddddddddd');
+        
+        showMessage(`New message from ${msg.sender_nickname}`);
+      }
+    }
+  };
+}
+
+
+
+function showMessage(message) {
+  const popup = document.createElement("div");
+  popup.setAttribute("id", "message_popup");
+  popup.innerHTML = `<h2>${message}</h2>`;
+  document.body.appendChild(popup);
+
+  // Automatically hide after 3 seconds
+  setTimeout(() => {
+    popup.remove();
+  }, 3000);
+}
+
+function createStyledMessage(msg, currentUserId) {
+  const wrapper = document.createElement("div");
+  const isMine = msg.sender_id === currentUserId;
+
+  wrapper.className = isMine ? "outgoing-message" : "incoming-message";
+  wrapper.innerHTML = `
+    <div class="message-meta">
+      <span class="message-user">${msg.sender_nickname}</span>
+      <span class="message-time">${new Date(msg.timestamp || Date.now()).toLocaleTimeString()}</span>
+    </div>
+    <div class="message-content">
+      <p>${msg.message_content}</p>
+    </div>
+  `;
+  return wrapper;
+}
+async function loadMessages(senderId, receiverId, offset, limit, container, prepend = false) {
+  try {
+    const res = await fetch("/api/v1/chat/history", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ sender_id: senderId, receiver_id: receiverId, offset, limit }),
+    });
+
+    let messages = await res.json();
+    if (!Array.isArray(messages) || messages.length === 0) return false;
+
+    // 🔁 Sort messages by timestamp (asc)
+   
+const holder = document.createDocumentFragment();
+    messages.forEach(msg => {
+      const msgEl = createStyledMessage(msg, senderId);
+      holder.append(msgEl)
+      
+    });
+    if (prepend) {
+        container.prepend(holder);
+      } else {
+        container.appendChild(holder);
+      }
+
+    return true;
+  } catch (err) {
+    console.error("Failed to load messages:", err);
+    return false;
+  }
+}
+
+function createChatWindow(receiverId, nickname) {
   const chatWindow = document.createElement("div");
   chatWindow.className = "chat-window";
   chatWindow.id = "chat_window";
@@ -68,93 +199,23 @@ async function showChatWindow(receiverId, nickname) {
     </div>
     <span user-id="${receiverId}" class="hidden" style="display:none;"></span>
   `;
-  chatContainer.appendChild(chatWindow);
+  return chatWindow;
+}
 
-  const messagesContainer = chatWindow.querySelector(".chat-messages");
-
-  // Close chat
-  document.getElementById("close_chat").addEventListener("click", () => {
-    chatContainer.innerHTML = "";
-    routeTo("posts");
-  });
-
-  // Fetch initial chat history
-  try {
-    const response = await fetch("/api/v1/chat/history", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        sender_id: senderId,
-        receiver_id: receiverId,
-        offset,
-        limit,
-      }),
-    });
-
-    const messages = await response.json();
-    messages.forEach((msg) => {
-      const p = document.createElement("p");
-      p.textContent = `${msg.sender_nickname}: ${msg.message_content}`;
-      messagesContainer.appendChild(p);
-    });
-
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  } catch (err) {
-    console.error("Failed to fetch history:", err);
-  }
-
-  // Setup WebSocket
-  const socket = getsocket() || await establishConnection();
-
-  // Send message
-  document.getElementById("sent-message").addEventListener("click", () => {
-    const input = document.getElementById("message");
-    const message = input.value.trim();
-    if (!message) return;
-
-    const msgData = {
-      sender_id: senderId,
-      receiver_id: receiverId,
-      message_content: message,
-      timestamp: new Date().toISOString(),
-      message_type: "message",
-    };
-
-    socket.send(JSON.stringify(msgData));
-    input.value = "";
-  });
-
-  // Handle real-time incoming messages
-  socket.onmessage = (event) => {
-    const msg = JSON.parse(event.data);
-
-    if (msg.message_type === "message") {
-      // Only display messages relevant to this open chat
-      if (
-        (msg.sender_id === receiverId && msg.receiver_id === senderId) ||
-        (msg.sender_id === senderId && msg.receiver_id === receiverId)
-      ) {
-        const p = document.createElement("p");
-        p.textContent = `${msg.sender_nickname}: ${msg.message_content}`;
-        messagesContainer.appendChild(p);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-      } else {
-        // Optionally notify user that a message was received from someone else
-        showMessage(`New message from ${msg.sender_nickname}`);
-      }
-    }
+function debounce(func, delay) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), delay);
   };
 }
 
 
+export {
+  establishConnection,
+  showChatWindow,
+  getsocket,
+  showMessage
 
 
-
- export {
-   establishConnection,
-   showChatWindow,
-   getsocket
-   
-
- }
+}

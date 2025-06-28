@@ -1,11 +1,12 @@
+/* Chat Window Container */
 .chat-window {
   background-color: var(--card-bg);
   border-radius: 12px;
   box-shadow: 0 4px 20px var(--shadow-color);
+  width: 420px; /* Fixed width */
+  height: 500px; /* Fixed height */
   display: flex;
   flex-direction: column;
-  max-width: 500px;
-  width: 100%;
   margin: 2rem auto;
 }
 
@@ -16,6 +17,7 @@
   align-items: center;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-color);
 }
 
 .chat-user-info {
@@ -50,15 +52,15 @@
   color: var(--danger-color);
 }
 
-/* Message Area */
+/* Message Area - Scrollable */
 .chat-messages {
   flex: 1;
-  padding: 1rem 1.5rem;
+  padding: 1rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  background-color: var(--input-bg);
+  gap: 1rem;
+  background-color: var(--bg-color);
 }
 
 /* Scrollbar Styling */
@@ -75,6 +77,74 @@
   border-radius: 10px;
 }
 
+/* Base Bubble Style */
+.message-bubble {
+  max-width: 70%;
+  padding: 0.75rem 1rem;
+  word-wrap: break-word; /* Prevent long lines from breaking layout */
+  line-height: 1.4;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  position: relative;
+}
+
+.message-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.message-content p {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+/* Incoming Message Style */
+.incoming-message {
+  align-self: flex-start;
+}
+
+.incoming-message .message-bubble {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-radius: 12px 12px 12px 4px;
+}
+
+/* Outgoing Message Style */
+.outgoing-message {
+  align-self: flex-end;
+}
+
+.outgoing-message .message-bubble {
+  background-color: var(--accent-color);
+  color: white;
+  border-radius: 12px 12px 4px 12px;
+}
+
+/* Optional: Add Tail Arrows for Visual Separation */
+.message-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+}
+
+.incoming-message .message-bubble::after {
+  left: -6px;
+  border-right-color: var(--input-bg);
+  border-left-width: 0;
+}
+
+.outgoing-message .message-bubble::after {
+  right: -6px;
+  border-left-color: var(--accent-color);
+  border-right-width: 0;
+}
+
 /* Input + Send Button */
 .chat-input-area {
   display: flex;
@@ -82,7 +152,7 @@
   gap: 0.5rem;
   padding: 1rem 1.5rem;
   border-top: 1px solid var(--border-color);
-  background-color: var(--bg-color);
+  background-color: var(--card-bg);
 }
 
 .chat-input-area input[type="text"] {

@@ -27,12 +27,7 @@ async function routeTo(route, data) {
     
 
       break;
-    case 'messages':
-
-      await establishConnection()
-
-
-      break;
+   
     case 'home':
       renderheader(section)
       break
