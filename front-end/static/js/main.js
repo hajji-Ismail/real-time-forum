@@ -1,70 +1,77 @@
 import { isAouth, renderLoginPage, renderRegisterpage } from "./auth.js";
 
-import { renderheader, renderProfile } from "./home.js";
+import { renderheader, renderProfile, renderUsers } from "./home.js";
 import { establishConnection } from "./messages.js";
 import { renderPosts } from "./posts.js";
 
 
-async function routeTo(route , data) {
-   let section =  document.getElementById('app')
+async function routeTo(route, data) {
+  let section = document.getElementById('app')
   switch (route) {
     case 'login':
-        renderLoginPage(section)
+      renderLoginPage(section)
 
       break;
     case 'register':
-      console.log("register");
-      
+
       renderRegisterpage(section)
-     
+
       break;
     case 'posts':
-      console.log("posts");
-    
-      renderPosts(section)
-   
+  await renderPosts(section)
       break;
     case 'messages':
-      console.log('mesg');
-      
+
       await establishConnection()
-      
-      
-      break;
-    case 'home' :
-       renderheader(section)
-       break
-    case 'profile':
-      renderProfile(section,data)
-      break
-    
-  
 
     
+
+      break;
+    case 'messages':
+
+      await establishConnection()
+
+
+      break;
+    case 'home':
+      renderheader(section)
+      break
+    case 'profile':
+      renderProfile(section, data)
+      break
+    case 'users':
+      renderUsers(section)
+      break
+
+
+
+
 
     default:
-     
 
 
-     
+
+
   }
 }
 
-async function main(){
-    let data = await isAouth()
-    if(!data){
-     
-        
-        routeTo('login')
-    } else {
-      routeTo('messages')
-      routeTo('home')
-      routeTo('profile' , data)
-      routeTo('posts')
-      
-     
-    }
+async function main() {
+  let data = await isAouth()
+  if (!data) {
+
+
+    routeTo('login')
+  } else {
+    routeTo('messages')
+    routeTo('home')
+    routeTo('posts')
+    routeTo('profile', data)
+    routeTo('users')
+
+
+
+  }
 }
-export { routeTo , main}
+export { routeTo, main }
 main()
 

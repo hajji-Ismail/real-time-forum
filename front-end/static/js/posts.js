@@ -1,7 +1,7 @@
 import { attachCommentListeners } from "./comment.js";
-import { main, routeTo } from "./main.js";
+import { main, } from "./main.js";
 
-async function showpostsPosts() {
+async function showPosts() {
     try {
         const response = await fetch("/api/v1/posts");
         console.log(response);
@@ -77,7 +77,7 @@ async function renderPosts(section) {
   const postsWrapper = document.createElement('div');
   postsWrapper.className = 'posts-wrapper';
 
-  const posts = await showpostsPosts();
+  const posts = await showPosts();
 
   if (!posts || posts.length === 0) {
     postsWrapper.innerHTML = `<p>No posts available.</p>`;
@@ -135,9 +135,9 @@ async function renderPosts(section) {
     });
   }
 
-  const content = section.querySelector(".content") || section;
+  const content = section.querySelector(".main-container") || section;
 
-  content.appendChild(postsWrapper);
+  content.append(postsWrapper);
 
 attachCommentListeners()
 }
