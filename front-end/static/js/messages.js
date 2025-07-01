@@ -48,6 +48,11 @@ function getsocket() {
 }
 
 async function showChatWindow(receiverId, nickname) {
+   const username = document.getElementById("logged-in-nickname")?.innerText;
+ 
+  
+  
+
   const chatContainer = document.querySelector(".main-container");
   if (!chatContainer) return;
 
@@ -62,6 +67,7 @@ async function showChatWindow(receiverId, nickname) {
 
   const messagesContainer = document.querySelector(".chat-messages");
   const input = document.getElementById("message");
+
 
   // Close handler
   document.getElementById("close_chat").addEventListener("click", () => {
@@ -87,6 +93,7 @@ async function showChatWindow(receiverId, nickname) {
 
   // WebSocket setup
   const socket = getsocket() || await establishConnection();
+ setupTypingIndicator(socket, username, senderId, receiverId);
 
   // Send message
   document.getElementById("sent-message").addEventListener("click", () => {
@@ -112,7 +119,7 @@ async function showChatWindow(receiverId, nickname) {
     const msg = JSON.parse(event.data);
     console.log(msg, 'message');
 
-
+   
     if (msg.message_type === "message") {
       console.log('hi');
 
@@ -130,14 +137,81 @@ async function showChatWindow(receiverId, nickname) {
         showMessage(`New message from ${msg.sender_nickname}`);
       }
     }
-    if (msg.message_type === "Online" || msg.message_type === "Offline") {
-      console.log('hi');
-
-      updateUserStatus(msg.sender_id, msg.message_type);
+    if (msg.message_type === "Online") {
+      updateUserStatus(message.sender_id, true);
     }
+
+    if (msg.message_type === "Offline") {
+      updateUserStatus(message.sender_id, false);
+    }
+    if (msg.message_type === "typing") {
+    removeTypingIndicator(messagesContainer);
+    const typingEl = createTypingIndicator(msg.sender_nickname);
+    messagesContainer.appendChild(typingEl);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  if (msg.message_type === "fin") {
+    removeTypingIndicator(messagesContainer);
+  }
+
+
+
 
   };
 }
+function setupTypingIndicator(socket, username, senderId, receiverId) {
+  const messageInput = document.getElementById("message");
+  console.log("it's been setuped");
+  
+  if (!messageInput) return;
+
+  let typingTimeout;
+  let isTyping = false;
+  setupTypingIndicator;
+
+  messageInput.addEventListener("input", () => {
+    console.log("it's been setuped the event")
+    if (!isTyping) {
+      // Send typing: true only once when typing starts
+      const typingData = {
+        sender_nickname: username,
+        sender_id: senderId,
+        receiver_id: receiverId,
+        message_type: "typing",
+      };
+      console.log(typingData, 'typing');
+      
+      socket.send(JSON.stringify(typingData));
+      isTyping = true;
+    }
+
+    // Reset the timer on every keypress
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      // Send typing: false after 2 seconds of inactivity
+      const stopTypingData = {
+        sender_nickname: username,
+        sender_id: senderId,
+        receiver_id: receiverId,
+        message_type: "fin",
+      };
+      socket.send(JSON.stringify(stopTypingData));
+      isTyping = false;
+    }, 2000); // 2 seconds delay
+  });
+  window.addEventListener("beforeunload", () => {
+    const stopTypingData = {
+      sender_nickname: username,
+      sender_id: senderId,
+      receiver_id: receiverId,
+      message_type: "fin",
+    };
+    socket.send(JSON.stringify(stopTypingData));
+    isTyping = false;
+  });
+}
+
 
 
 function updateUserStatus(userId, isOnline) {
@@ -222,7 +296,7 @@ function createChatWindow(receiverId, nickname) {
     <div class="chat-header">
       <div class="chat-user-info">
         <img src="/front-end/static/assets/avatar.png" class="user-avatar small-avatar" alt="Avatar of ${nickname}" />
-        <span class="user-nickname">${nickname}</span>
+        <span class="user-nickname" id='logged-in-nickname'>${nickname}</span>
       </div>
       <button id="close_chat" class="close-btn">X</button>
     </div>
@@ -242,6 +316,24 @@ function debounce(func, delay) {
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(this, args), delay);
   };
+}
+
+function removeTypingIndicator(container) {
+  const indicator = container.querySelector("#typing-indicator");
+  if (indicator) indicator.remove();
+}
+
+function createTypingIndicator(nickname) {
+  const typing = document.createElement("div");
+  typing.className = "typing-indicator";
+  typing.id = "typing-indicator";
+  typing.innerHTML = `
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="typing-text">${nickname} is typing...</span>
+  `;
+  return typing;
 }
 
 
