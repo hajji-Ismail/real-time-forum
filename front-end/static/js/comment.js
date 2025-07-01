@@ -1,6 +1,6 @@
 function attachCommentListeners() {
   const commentButtons = document.querySelectorAll(".comment-button");
-  const commentCounts = document.querySelectorAll(".comment-count");
+  const commentLabels = document.querySelectorAll(".comment-label");
 
   // Handle comment submission
   commentButtons.forEach((button) => {
@@ -19,26 +19,17 @@ function attachCommentListeners() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            post_id: postId,
-            comment: commentText,
-          }),
+          body: JSON.stringify({ post_id: postId, comment: commentText }),
         });
 
         if (!response.ok) {
           const errData = await response.json();
-          throw {
-            code: errData.Code,
-            message: errData.Message,
-          };
+          throw new Error(errData.Message || "Failed to add comment");
         }
 
-        const res = await response.json();
         input.value = "";
 
         const commentContainer = postCard.querySelector(`[data-comments-for="${postId}"]`);
-
-        // If comments already loaded, prepend new comment
         if (commentContainer.dataset.loaded === "true") {
           const newComment = document.createElement("p");
           newComment.textContent = `You: ${commentText}`;
@@ -46,36 +37,36 @@ function attachCommentListeners() {
           commentContainer.classList.remove("hidden");
         }
 
-        // Increment comment count visually
         const countSpan = postCard.querySelector(".comment-count");
         const currentCount = parseInt(countSpan.textContent) || 0;
         countSpan.textContent = currentCount + 1;
 
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
       }
     });
   });
 
-  // Handle click on comment count to fetch and show comments
-  commentCounts.forEach((countSpan) => {
-    countSpan.addEventListener("click", () => {
-      const postCard = countSpan.closest(".post-card");
-      const postIdElement = postCard.querySelector("[data-post-id]");
-      const postId = parseInt(postIdElement.dataset.postId);
+  // Handle label click to toggle comments
+  commentLabels.forEach((label) => {
+    label.addEventListener("click", async () => {
+      const postCard = label.closest(".post-card");
+      const postId = parseInt(label.dataset.postId);
       const commentContainer = postCard.querySelector(`[data-comments-for="${postId}"]`);
 
-      // If comments already loaded, just toggle visibility
-      if (commentContainer.dataset.loaded === "true") {
-        commentContainer.classList.toggle("hidden");
-        return;
+      if (commentContainer.classList.contains("hidden")) {
+        if (commentContainer.dataset.loaded !== "true") {
+          await show(postId, commentContainer);
+          commentContainer.dataset.loaded = "true";
+        }
+        commentContainer.classList.remove("hidden");
+      } else {
+        commentContainer.classList.add("hidden");
       }
-
-      // Use your show function to fetch and render comments
-      show(postId, commentContainer);
     });
   });
 }
+
 async function show(postId, commentContainer) {
   try {
     const response = await fetch(

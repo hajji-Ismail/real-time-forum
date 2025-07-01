@@ -35,7 +35,7 @@ async function routeTo(route, data) {
       renderProfile(section, data)
       break
     case 'users':
-      renderUsers(section)
+     await renderUsers(section)
       break
 
 
@@ -57,9 +57,8 @@ async function main() {
 
     routeTo('login')
   } else {
+    routeTo('users')
     routeTo('messages')
-     routeTo('users')
-
     routeTo('home')
     routeTo('posts')
     routeTo('profile', data)

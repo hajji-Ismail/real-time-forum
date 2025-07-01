@@ -201,3 +201,149 @@
 .comment-list p {
   margin: 0.5rem 0;
 }
+/* Form Container */
+#createPost_form_element {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  max-width: 600px;
+  width: 100%;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Title */
+#createPost_form_element h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  color: var(--accent-color);
+  margin-bottom: 1.5rem;
+}
+
+/* Labels */
+#createPost_form_element label {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  display: block;
+}
+
+/* Inputs & Textarea */
+#createPost_form_element input[type="text"],
+#createPost_form_element textarea {
+  width: 100%;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  color: var(--input-text);
+  font-size: 1rem;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+#createPost_form_element input:focus,
+#createPost_form_element textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+/* Category Section */
+.category-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.category-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.category-checkbox input[type="checkbox"] {
+  accent-color: var(--accent-color); /* Modern checkbox styling*/
+}
+
+/* Error Messages */
+.error-text {
+  color: var(--danger-color);
+  font-size: 0.85rem;
+  min-height: 1em;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+/* Submit Button */
+#createPost_form_element button[type="submit"] {
+  margin-top: 1rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+#createPost_form_element button[type="submit"]:hover {
+  background-color: var(--accent-hover);
+}
+.comments-list {
+  padding: 1rem;
+  background-color: var(--input-bg);
+  border-radius: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Scrollbar (optional) */
+.comments-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comments-list::-webkit-scrollbar-track {
+  background: var(--scrollbar-bg);
+}
+
+.comments-list::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 10px;
+}
+
+/* Individual comment */
+.comments-list p {
+  margin: 0;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  word-wrap: break-word;
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+}
+
+/* Style comments by user (customize as needed) */
+.comments-list p:nth-child(even) {
+  background-color: var(--bg-color);
+  color: var(--text-secondary);
+}
+
+/* Highlight Hedwig's comments differently */
+.comments-list p strong.user-Hedwig {
+  color: var(--accent-color);
+  font-weight: bold;
+}
+.comments-list.hidden {
+  display: none;
+}

@@ -16,18 +16,32 @@ async function establishConnection() {
       socket.send(JSON.stringify({ sender_id: senderId }));
       resolve(socket);
     };
-    socket.onmessage = (event) => {
+    socket.onmessage = async (event) => {
       const message = JSON.parse(event.data);
+      console.log('message', message, new Date().getTime());
+      
 
-      if (message.message_type === "Online") {
-        updateUserStatus(message.sender_id, true);
+
+      if (message.message_type === "Online" || message.message_type === "Offline") {
+        let isOnline = message.message_type === "Online" ? true : false
+        let users = document.querySelector('.users')
+        console.log(users, 'establish users');
+       
+         const userItems = users.querySelectorAll('li');
+         console.log(userItems , 'li');
+         
+        
+      
+        // Locate the user's <li> by data-user-id
+        let userItem = users.querySelector(`.active-${message.sender_nickname}`);
+        console.log(userItem, "neckname id");
+
+    
+
+        await updateUserStatus(userItems, message.sender_nickname, isOnline);
+
       }
 
-      if (message.message_type === "Offline") {
-        updateUserStatus(message.sender_id, false);
-      }
-
-      // handle other message types like "message" here...
     };
 
 
@@ -39,6 +53,7 @@ async function establishConnection() {
     socket.onclose = () => {
       console.warn("WebSocket closed.");
       socket = null;
+      routeTo('login')
     };
   });
 }
@@ -48,10 +63,10 @@ function getsocket() {
 }
 
 async function showChatWindow(receiverId, nickname) {
-   const username = document.getElementById("logged-in-nickname")?.innerText;
- 
-  
-  
+  const username = document.getElementById("logged-in-nickname")?.innerText;
+
+
+
 
   const chatContainer = document.querySelector(".main-container");
   if (!chatContainer) return;
@@ -93,7 +108,7 @@ async function showChatWindow(receiverId, nickname) {
 
   // WebSocket setup
   const socket = getsocket() || await establishConnection();
- setupTypingIndicator(socket, username, senderId, receiverId);
+  setupTypingIndicator(socket, username, senderId, receiverId);
 
   // Send message
   document.getElementById("sent-message").addEventListener("click", () => {
@@ -119,8 +134,9 @@ async function showChatWindow(receiverId, nickname) {
     const msg = JSON.parse(event.data);
     console.log(msg, 'message');
 
-   
+
     if (msg.message_type === "message") {
+
       console.log('hi');
 
       const isChattingWithSender =
@@ -128,32 +144,31 @@ async function showChatWindow(receiverId, nickname) {
         (msg.sender_id === senderId && msg.receiver_id === receiverId);
 
       if (isChattingWithSender) {
+
+
         const messageElement = createStyledMessage(msg, senderId);
         messagesContainer.appendChild(messageElement);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
       } else {
-        console.log('sdfsdfsdfvdddddddddddddddddddddddddddddddddddddddddd');
+
 
         showMessage(`New message from ${msg.sender_nickname}`);
       }
     }
-    if (msg.message_type === "Online") {
-      updateUserStatus(message.sender_id, true);
-    }
 
-    if (msg.message_type === "Offline") {
-      updateUserStatus(message.sender_id, false);
-    }
+
+
+
     if (msg.message_type === "typing") {
-    removeTypingIndicator(messagesContainer);
-    const typingEl = createTypingIndicator(msg.sender_nickname);
-    messagesContainer.appendChild(typingEl);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  }
+      removeTypingIndicator(messagesContainer);
+      const typingEl = createTypingIndicator(msg.sender_nickname);
+      messagesContainer.appendChild(typingEl);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 
-  if (msg.message_type === "fin") {
-    removeTypingIndicator(messagesContainer);
-  }
+    if (msg.message_type === "fin") {
+      removeTypingIndicator(messagesContainer);
+    }
 
 
 
@@ -163,7 +178,7 @@ async function showChatWindow(receiverId, nickname) {
 function setupTypingIndicator(socket, username, senderId, receiverId) {
   const messageInput = document.getElementById("message");
   console.log("it's been setuped");
-  
+
   if (!messageInput) return;
 
   let typingTimeout;
@@ -181,7 +196,7 @@ function setupTypingIndicator(socket, username, senderId, receiverId) {
         message_type: "typing",
       };
       console.log(typingData, 'typing');
-      
+
       socket.send(JSON.stringify(typingData));
       isTyping = true;
     }
@@ -214,17 +229,29 @@ function setupTypingIndicator(socket, username, senderId, receiverId) {
 
 
 
-function updateUserStatus(userId, isOnline) {
-  // Find the user's status dot using data-user-id
-  const userItem = document.querySelector(`li[data-user-id="${userId}"]`);
-  if (!userItem) return;
+async function updateUserStatus(user, nickname, isOnline) {
+  // console.log(users, 'users in update');
 
-  const statusDot = userItem.querySelector(".status-dot");
-  if (!statusDot) return;
+  console.log(nickname, isOnline, 'update status param');
 
-  statusDot.classList.remove("online", "offline");
-  statusDot.classList.add(isOnline ? "online" : "offline");
+  // Locate the user's <li> by data-user-id
+  // let userItem = users.querySelector(`.active-${nickname}`);
+  // console.log(`active-${nickname}`, "neckname id");
+
+  console.log(user, 'useritem');
+  if (!user) return
+
+  // Locate the .status-dot element inside it
+  // let statusDot = user.querySelector(".status-dot");
+  // console.log(statusDot, 'statusdot');
+
+  // if (!statusDot) return;
+
+  // // Normalize class names: remove both possible ones before adding the new one
+  // statusDot.classList.remove("online", "offline");
+  // statusDot.classList.add(isOnline ? "online" : "offline");
 }
+
 
 
 function showMessage(message) {
@@ -264,6 +291,9 @@ async function loadMessages(senderId, receiverId, offset, limit, container, prep
       body: JSON.stringify({ sender_id: senderId, receiver_id: receiverId, offset, limit }),
     });
 
+    if (!res.ok) {
+      routeTo('login')
+    }
     let messages = await res.json();
     if (!Array.isArray(messages) || messages.length === 0) return false;
 
@@ -318,12 +348,12 @@ function debounce(func, delay) {
   };
 }
 
-function removeTypingIndicator(container) {
+function removeTypingIndicator() {
   const indicator = container.querySelector("#typing-indicator");
   if (indicator) indicator.remove();
 }
 
-function createTypingIndicator(nickname) {
+function createTypingIndicator() {
   const typing = document.createElement("div");
   typing.className = "typing-indicator";
   typing.id = "typing-indicator";
@@ -331,7 +361,7 @@ function createTypingIndicator(nickname) {
     <span class="dot"></span>
     <span class="dot"></span>
     <span class="dot"></span>
-    <span class="typing-text">${nickname} is typing...</span>
+
   `;
   return typing;
 }

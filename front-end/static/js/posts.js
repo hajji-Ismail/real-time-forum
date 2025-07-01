@@ -1,5 +1,5 @@
 import { attachCommentListeners } from "./comment.js";
-import { main, } from "./main.js";
+import { main, routeTo, } from "./main.js";
 
 async function showPosts() {
     try {
@@ -10,7 +10,9 @@ async function showPosts() {
                 code: response.status,
                 message: response.statusText,
             };
+             routeTo('login')
             throw err;
+           
         }
 
         const posts = await response.json();
@@ -19,6 +21,7 @@ async function showPosts() {
         return posts;
     } catch (error) {
         console.log(error);
+         routeTo('login')
     }
 
 }
@@ -55,8 +58,10 @@ function createPost() {
                 const errorData = await response.json();
 
                 if (errorData.UserErrors.HasError) {
-                    showPostForm(errorData.UserErrors, true);
+                    showPostForm(errorData.UserErrors);
                     return;
+                } else {
+                  routeTo('login')
                 }
 
                 const error = {
@@ -72,6 +77,16 @@ function createPost() {
         }
     });
 }
+function showPostForm(errors = {}) {
+  const titleError = document.querySelector("#title + .error-text");
+  const contentError = document.querySelector("#content + .error-text");
+  const categoryError = document.querySelector(".category-container + .error-text");
+
+  if (titleError) titleError.textContent = errors.PostTilte || "";
+  if (contentError) contentError.textContent = errors.PostContent || "";
+  if (categoryError) categoryError.textContent = errors.Postcategories || "";
+}
+
 async function renderPosts(section) {
   const postsWrapper = document.createElement('div');
   postsWrapper.className = 'posts-wrapper';
@@ -124,10 +139,14 @@ async function renderPosts(section) {
       <div class="comments-list hidden" data-comments-for="${post.ID}"></div>
 
 
-        <div class="post-footer">
-       <span><i class="fa-solid fa-comment"></i> <span class="comment-count">${post.TotalComments}</span></span>
+   <div class="post-footer">
+<label class="comment-label" data-post-id="${post.ID}">
+  <i class="fa-solid fa-comment"></i>
+  <span class="comment-count">${post.TotalComments}</span>
+</label>
 
-        </div>
+</div>
+
       `;
 
       postsWrapper.appendChild(postCard);
@@ -145,8 +164,9 @@ function createpostrender(section = document.body, errors = {}) {
     const create = document.createElement('div');
 
     create.innerHTML = `
-    <h2>Create a Post</h2>
+ 
     <form id="createPost_form_element">
+       <h2>Create a Post</h2>
       <label for="title">Title:</label>
       <input type="text" id="title" name="title" maxlength="255" required />
       <span class="error-text">${errors.PostTilte || ""}</span>
@@ -191,13 +211,13 @@ function createpostrender(section = document.body, errors = {}) {
       <button type="submit">Create Post</button>
     </form>
   `;
-    const content = section.getElementsByClassName('posts-wrapper')[0];
+    const content = section.getElementsByClassName('main-container')[0];
 
     if (content) {
         content.prepend(create);
     } else {
         // fallback: append directly to section if .content not found
-        section.prepend(create);
+        section.append(create);
     }
     createPost()
 }

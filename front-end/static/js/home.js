@@ -1,5 +1,5 @@
 import { main, routeTo } from "./main.js";
-import { showChatWindow } from "./messages.js";
+import { getsocket, showChatWindow } from "./messages.js";
 import { createpostrender } from "./posts.js";
 function renderheader(section) {
   section.innerHTML = ` <section class="content">
@@ -41,31 +41,47 @@ function renderheader(section) {
     main(); // assuming "posts" is root/main forum page
   });
   document.getElementById("open-post-form").addEventListener("click", () => {
-    createpostrender(section);
-    document.getElementById("open-post-form").style.display = 'none'
-    // Your existing function to show the form
-  });
-
-
-  document.getElementById('logout-btn').addEventListener('click', async () => {
-    try {
-      const response = await fetch("/api/v1/users/logout", {
-        method: "GET",
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        routeTo("login")
-        localStorage.removeItem("is_logged");
-      } else {
-        const errorData = await response.json();
-        throw { code: errorData.Code, message: errorData.Message };
-      }
-    } catch (err) {
-      console.log(err);
-
+    // Check if form already exists
+    if (!section.querySelector("#createPost_form_element")) {
+      createpostrender(section);
+    } else {
+      // Optionally, you can focus the form or give some feedback
+      const existingForm = section.querySelector("#createPost_form_element");
+      existingForm.querySelector("#title").focus();
     }
   });
+
+
+
+ document.getElementById('logout-btn').addEventListener('click', async () => {
+  try {
+    const response = await fetch("/api/v1/users/logout", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      // Close WebSocket if open
+      const activeSocket = getsocket();
+      if (activeSocket && activeSocket.readyState === WebSocket.OPEN) {
+        activeSocket.close();
+      }
+
+      // Clear session/local storage
+      sessionStorage.clear();
+      localStorage.removeItem("is_logged");
+
+      // Route to login
+      routeTo("login");
+    } else {
+      const errorData = await response.json();
+      throw { code: errorData.Code, message: errorData.Message };
+    }
+  } catch (err) {
+    console.log("Logout error:", err);
+  }
+});
+
 }
 
 function renderProfile(section = document.body, user) {
@@ -131,14 +147,15 @@ async function renderUsers(section) {
     users.forEach(user => {
       const li = document.createElement("li");
       li.className = "user-item";
-      li.id = `active-${user.nickname}`;
+      li.className = `active-${user.nickname}`;
       li.setAttribute("data-user-id", user.id);
       li.setAttribute("data-user-nickname", user.nickname);
 
       li.innerHTML = `
         <div class="avatar-wrapper">
           <img class="user-avatar" src="/front-end/static/assets/avatar.png" alt="Profile picture of ${user.nickname}" />
-          <span class="status-dot ${user.online ? 'active' : 'offline'}"></span>
+       <span class="status-dot ${user.online ? 'online' : 'offline'}"></span>
+
         </div>
         <span class="user-nickname">${user.nickname}</span>
       `;
@@ -157,7 +174,7 @@ async function renderUsers(section) {
         console.log("Event target:", target);
         console.log("User ID:", receiverId);
 
-          showChatWindow(receiverId,receiverNickname)
+        showChatWindow(receiverId, receiverNickname)
 
       });
 
